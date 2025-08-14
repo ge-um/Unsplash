@@ -6,8 +6,13 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		03BA3FF82E4E11C80092AD38 /* .gitignore in Resources */ = {isa = PBXBuildFile; fileRef = 03BA3FF72E4E11C80092AD38 /* .gitignore */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXFileReference section */
 		03BA3FDB2E4E116A0092AD38 /* Unsplash.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Unsplash.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		03BA3FF72E4E11C80092AD38 /* .gitignore */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitignore; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -45,6 +50,7 @@
 		03BA3FD22E4E116A0092AD38 = {
 			isa = PBXGroup;
 			children = (
+				03BA3FF72E4E11C80092AD38 /* .gitignore */,
 				03BA3FDD2E4E116A0092AD38 /* Unsplash */,
 				03BA3FDC2E4E116A0092AD38 /* Products */,
 			);
@@ -122,6 +128,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				03BA3FF82E4E11C80092AD38 /* .gitignore in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
