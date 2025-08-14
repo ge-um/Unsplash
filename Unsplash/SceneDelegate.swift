@@ -27,16 +27,16 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         trendingViewController.tabBarItem = UITabBarItem(title: nil, image: UIImage(systemName: "chart.line.uptrend.xyaxis"), tag: 0)
         
         let reelsViewController = UIViewController()
-        reelsViewController.tabBarItem = UITabBarItem(title: nil, image: UIImage(systemName: "magnifyingglass"), tag: 1)
+        reelsViewController.tabBarItem = UITabBarItem(title: nil, image: UIImage(systemName: "video.square"), tag: 1)
         
-        let searchViewController = SearchViewController()
-        searchViewController.tabBarItem = UITabBarItem(title: nil, image: UIImage(systemName: "video.square"), tag: 2)
+        let searchViewController = UINavigationController(rootViewController: SearchViewController())
+        searchViewController.tabBarItem = UITabBarItem(title: nil, image: UIImage(systemName: "magnifyingglass"), tag: 2)
         
         let likesViewController = UIViewController()
         likesViewController.tabBarItem = UITabBarItem(title: nil, image: UIImage(systemName: "heart"), tag: 3)
                 
         tabbarController.viewControllers = [trendingViewController, reelsViewController, searchViewController, likesViewController]
-        window.rootViewController = UINavigationController(rootViewController: tabbarController)
+        window.rootViewController = tabbarController
         
         self.window = window
         window.makeKeyAndVisible()
