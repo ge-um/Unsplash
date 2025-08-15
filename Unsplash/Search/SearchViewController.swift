@@ -17,11 +17,22 @@ final class SearchViewController: UIViewController {
         return searchBar
     }()
     
-    private let colorCollectionView: UICollectionView = {
+    private lazy var colorCollectionView: UICollectionView = {
         let layout = UICollectionViewFlowLayout()
-        let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
-        collectionView.backgroundColor = .red
+        layout.scrollDirection = .horizontal
+        layout.minimumLineSpacing = 8
+        layout.minimumInteritemSpacing = 0
+        layout.sectionInset = .init(top: 0, left: 0, bottom: 8, right: 92)
+        layout.itemSize = .init(width: 100, height: 36)
         
+        let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
+        
+        collectionView.showsHorizontalScrollIndicator = false
+        
+        collectionView.register(ColorCell.self, forCellWithReuseIdentifier: ColorCell.identifier)
+        collectionView.dataSource = self
+        collectionView.delegate = self
+                
         return collectionView
     }()
     
@@ -30,6 +41,7 @@ final class SearchViewController: UIViewController {
         
         var config = UIButton.Configuration.bordered()
         config.image = UIImage(systemName: "list.bullet.indent", withConfiguration: UIImage.SymbolConfiguration(pointSize: 14, weight: .regular))
+        
         config.attributedTitle = AttributedString("최신순", attributes: .init([.font: UIFont.systemFont(ofSize: 14, weight: .bold)]))
         config.background.backgroundColor = .white
         config.baseForegroundColor = .black
@@ -93,7 +105,7 @@ final class SearchViewController: UIViewController {
         
         orderButton.snp.makeConstraints { make in
             make.top.equalTo(searchBar.snp.bottom)
-            make.height.equalTo(44)
+            make.height.equalTo(36)
             make.trailing.equalTo(view.safeAreaLayoutGuide).offset(24)
         }
         
@@ -101,5 +113,19 @@ final class SearchViewController: UIViewController {
             make.top.equalTo(colorCollectionView.snp.bottom)
             make.bottom.horizontalEdges.equalTo(view.safeAreaLayoutGuide)
         }
+    }
+}
+
+extension SearchViewController: UICollectionViewDataSource, UICollectionViewDelegate {
+    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        return ImageColor.allCases.count
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        
+        guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: ColorCell.identifier, for: indexPath) as? ColorCell else { return UICollectionViewCell() }
+        cell.configure(with: ImageColor.allCases[indexPath.item])
+        
+        return cell
     }
 }
