@@ -8,6 +8,11 @@
 import SnapKit
 import UIKit
 
+enum SearchCollectionView: Int {
+    case color
+    case result
+}
+
 final class SearchViewController: UIViewController {
     
     private let searchBar: UISearchBar = {
@@ -32,6 +37,7 @@ final class SearchViewController: UIViewController {
         collectionView.register(ColorCell.self, forCellWithReuseIdentifier: ColorCell.identifier)
         collectionView.dataSource = self
         collectionView.delegate = self
+        collectionView.tag = SearchCollectionView.color.rawValue
                 
         return collectionView
     }()
@@ -65,11 +71,22 @@ final class SearchViewController: UIViewController {
         return label
     }()
     
-    private let resultCollectionView: UICollectionView = {
+    private lazy var resultCollectionView: UICollectionView = {
         let layout = UICollectionViewFlowLayout()
+        layout.scrollDirection = .vertical
+        layout.minimumInteritemSpacing = 4
+        layout.minimumLineSpacing = 4
         
+        let deviceSize = view.frame.width
+        layout.itemSize = CGSize(width: (deviceSize - 4) / 2, height: 240)
         let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
         collectionView.backgroundColor = .blue
+        
+        collectionView.register(ImageCell.self, forCellWithReuseIdentifier: ImageCell.identifier)
+        collectionView.delegate = self
+        collectionView.dataSource = self
+        collectionView.tag = SearchCollectionView.result.rawValue
+
         return collectionView
     }()
     
@@ -118,14 +135,30 @@ final class SearchViewController: UIViewController {
 
 extension SearchViewController: UICollectionViewDataSource, UICollectionViewDelegate {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return ImageColor.allCases.count
+        guard let type = SearchCollectionView(rawValue: collectionView.tag) else { return 0 }
+        
+        switch type {
+        case .color:
+            return ImageColor.allCases.count
+        case .result:
+            return 20
+        }
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        guard let type = SearchCollectionView(rawValue: collectionView.tag) else { return UICollectionViewCell() }
         
-        guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: ColorCell.identifier, for: indexPath) as? ColorCell else { return UICollectionViewCell() }
-        cell.configure(with: ImageColor.allCases[indexPath.item])
-        
-        return cell
+        switch type {
+        case .color:
+            guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: ColorCell.identifier, for: indexPath) as? ColorCell else { return UICollectionViewCell() }
+            cell.configure(with: ImageColor.allCases[indexPath.item])
+            
+            return cell
+
+        case .result:
+            guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: ImageCell.identifier, for: indexPath) as? ImageCell else { return UICollectionViewCell() }
+            
+            return cell
+        }
     }
 }

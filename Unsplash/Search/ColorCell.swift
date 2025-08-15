@@ -37,7 +37,6 @@ enum ImageColor: CaseIterable {
 }
 
 final class ColorCell: UICollectionViewCell, IsIdentifiable {
-
     
     let button: UIButton = {
         let button = UIButton()
