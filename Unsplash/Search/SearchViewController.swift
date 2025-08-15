@@ -15,7 +15,7 @@ enum SearchCollectionView: Int {
 
 final class SearchViewController: UIViewController {
     
-    private let searchBar: UISearchBar = {
+    private lazy var searchBar: UISearchBar = {
         let searchBar = UISearchBar()
         searchBar.placeholder = "키워드 검색"
         searchBar.searchBarStyle = .minimal
@@ -100,6 +100,9 @@ final class SearchViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         setUpUI()
+        
+        NetworkManager.shared.callRequest(api: .search(keyword: "바다", page: 1, orderedBy: .latest, color: .purple), type: [SearchResponse].self) { result in
+        }
     }
     
     private func setUpUI() {

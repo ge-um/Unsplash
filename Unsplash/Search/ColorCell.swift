@@ -8,7 +8,7 @@
 import SnapKit
 import UIKit
 
-enum ImageColor: CaseIterable {
+enum ImageColor: String, CaseIterable {
     case black, white, yellow, red, purple, green, blue
 
     var uiColor: UIColor {
