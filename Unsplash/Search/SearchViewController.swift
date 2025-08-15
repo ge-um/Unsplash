@@ -94,6 +94,8 @@ final class SearchViewController: UIViewController {
         let stackView = UIStackView()
         return stackView
     }()
+    
+    private let viewModel = SearchViewModel()
         
     override func viewDidLoad() {
         super.viewDidLoad()
