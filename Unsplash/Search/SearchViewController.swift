@@ -80,7 +80,6 @@ final class SearchViewController: UIViewController {
         let deviceSize = view.frame.width
         layout.itemSize = CGSize(width: (deviceSize - 4) / 2, height: 240)
         let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
-        collectionView.backgroundColor = .blue
         
         collectionView.register(ImageCell.self, forCellWithReuseIdentifier: ImageCell.identifier)
         collectionView.delegate = self
@@ -96,12 +95,24 @@ final class SearchViewController: UIViewController {
     }()
     
     private let viewModel = SearchViewModel()
+    
+    var search = [SearchResponse]()
         
     override func viewDidLoad() {
         super.viewDidLoad()
         setUpUI()
         
-        NetworkManager.shared.callRequest(api: .search(keyword: "바다", page: 1, orderedBy: .latest, color: .purple), type: [SearchResponse].self) { result in
+        NetworkManager.shared.callRequest(api: .search(keyword: "바다", page: 1, orderedBy: .latest, color: .purple), type: [SearchResponse].self) { [weak self] response in
+            
+            guard let self = self else { return }
+            
+            switch response {
+            case .success(let searchResponse):
+                self.search = searchResponse
+                self.resultCollectionView.reloadData()
+            case .failure(let failure):
+                print(failure)
+            }
         }
     }
     
@@ -146,7 +157,7 @@ extension SearchViewController: UICollectionViewDataSource, UICollectionViewDele
         case .color:
             return ImageColor.allCases.count
         case .result:
-            return 20
+            return search.count
         }
     }
     
@@ -162,6 +173,7 @@ extension SearchViewController: UICollectionViewDataSource, UICollectionViewDele
 
         case .result:
             guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: ImageCell.identifier, for: indexPath) as? ImageCell else { return UICollectionViewCell() }
+            cell.configureData(search: search[indexPath.item])
             
             return cell
         }

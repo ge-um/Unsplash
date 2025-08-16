@@ -10,6 +10,7 @@ import Foundation
 
 enum NetworkError: Error {
     case endPoint
+    case AFError
 }
 
 final class NetworkManager {
@@ -23,9 +24,15 @@ final class NetworkManager {
             return
         }
         
+        // TODO: - 에러 핸들링
         AF.request(endPoint, parameters: api.parameters)
             .responseDecodable(of: T.self) { response in
-                print(response)
+                switch response.result {
+                case .success(let result):
+                    completionHandler(.success(result))
+                case .failure:
+                    completionHandler(.failure(.AFError))
+                }
             }
         }
 }

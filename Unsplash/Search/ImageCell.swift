@@ -6,10 +6,12 @@
 //
 
 import SnapKit
+import Kingfisher
 import UIKit
 
 final class ImageCell: UICollectionViewCell, IsIdentifiable {
     
+    // TODO: - imageView placeholder
     private let imageView: UIImageView = {
         let imageView = UIImageView()
         
@@ -23,7 +25,6 @@ final class ImageCell: UICollectionViewCell, IsIdentifiable {
         
         var config = UIButton.Configuration.filled()
         config.image = UIImage(systemName: "star.fill", withConfiguration: UIImage.SymbolConfiguration(font: .systemFont(ofSize: 8)))?.withTintColor(.systemYellow, renderingMode: .alwaysOriginal)
-        config.attributedTitle = .init("11111", attributes: .init([.font: UIFont.systemFont(ofSize: 12)]))
         config.imagePadding = 8
         config.background.backgroundColor = .darkGray
         config.cornerStyle = .capsule
@@ -60,8 +61,6 @@ final class ImageCell: UICollectionViewCell, IsIdentifiable {
     override init(frame: CGRect) {
         super.init(frame: .zero)
         
-        backgroundColor = .yellow
-        
         contentView.addSubview(imageView)
         contentView.addSubview(starButton)
         contentView.addSubview(likeButton)
@@ -71,14 +70,14 @@ final class ImageCell: UICollectionViewCell, IsIdentifiable {
         }
         
         starButton.snp.makeConstraints { make in
-            make.leading.equalToSuperview().offset(20)
-            make.bottom.equalToSuperview().inset(20)
+            make.leading.equalToSuperview().offset(12)
+            make.bottom.equalToSuperview().inset(12)
             make.height.equalTo(28)
         }
         
         likeButton.snp.makeConstraints { make in
-            make.trailing.equalToSuperview().inset(20)
-            make.bottom.equalToSuperview().inset(20)
+            make.trailing.equalToSuperview().inset(12)
+            make.bottom.equalToSuperview().inset(12)
             make.size.equalTo(28)
         }
     }
@@ -87,8 +86,13 @@ final class ImageCell: UICollectionViewCell, IsIdentifiable {
         fatalError("init(coder:) has not been implemented")
     }
     
-    func configureData() {
-        
+    // TODO: - Kingfisher logic 분리?
+    // TODO: - 다운샘플링 추가
+    func configureData(search: SearchResponse) {
+        starButton.configuration?.attributedTitle = .init("\(search.likes)", attributes: .init([.font: UIFont.systemFont(ofSize: 12)]))
+
+        guard let url = URL(string: search.urls.small) else { return }
+        imageView.kf.setImage(with: url)
     }
     
     // TODO: - MVVM으로 바꾸기
