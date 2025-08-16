@@ -101,19 +101,8 @@ final class SearchViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         setUpUI()
-        
-        NetworkManager.shared.callRequest(api: .search(keyword: "바다", page: 1, orderedBy: .latest, color: .purple), type: [SearchResponse].self) { [weak self] response in
-            
-            guard let self = self else { return }
-            
-            switch response {
-            case .success(let searchResponse):
-                self.search = searchResponse
-                self.resultCollectionView.reloadData()
-            case .failure(let failure):
-                print(failure)
-            }
-        }
+        configureData()
+        bindData()
     }
     
     private func setUpUI() {
@@ -147,6 +136,30 @@ final class SearchViewController: UIViewController {
             make.bottom.horizontalEdges.equalTo(view.safeAreaLayoutGuide)
         }
     }
+    
+    private func configureData() {
+        NetworkManager.shared.callRequest(api: .search(keyword: "바다", page: 1, orderedBy: .latest, color: .purple), type: [SearchResponse].self) { [weak self] response in
+            
+            guard let self = self else { return }
+            
+            switch response {
+            case .success(let searchResponse):
+                self.search = searchResponse
+                self.resultCollectionView.reloadData()
+            case .failure(let failure):
+                print(failure)
+            }
+        }
+    }
+    
+    private func bindData() {
+        viewModel.output.navigateToDetail.lazyBind { [weak self] selectedImage in
+            guard let self = self, let image = selectedImage else { return }
+            
+            let vc = SearchDetailViewController(image: image)
+            navigationController?.pushViewController(vc, animated: true)
+        }
+    }
 }
 
 extension SearchViewController: UICollectionViewDataSource, UICollectionViewDelegate {
@@ -176,6 +189,13 @@ extension SearchViewController: UICollectionViewDataSource, UICollectionViewDele
             cell.configureData(search: search[indexPath.item])
             
             return cell
+        }
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        
+        if collectionView == resultCollectionView {
+            viewModel.input.imageCellTapped.value = search[indexPath.item]
         }
     }
 }
