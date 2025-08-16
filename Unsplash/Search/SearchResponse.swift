@@ -25,6 +25,27 @@ struct SearchResponse: Decodable {
         case likes
         case user
     }
+    
+    var postDate: String {
+        let formatter = ISO8601DateFormatter()
+        formatter.formatOptions = [.withInternetDateTime]
+        
+        guard let date = formatter.date(from: createdAt) else {
+            return "Failed to convert date from isoString"
+        }
+        
+        let format = Date.FormatStyle()
+            .month(.wide)
+            .day(.twoDigits)
+            .year(.defaultDigits)
+            .locale(Locale(identifier: "ko_KR"))
+        
+        return date.formatted(format) + "게시됨"
+    }
+    
+    var size: String {
+        return "\(width) x \(height)"
+    }
 }
 
 struct SearchURL: Decodable {

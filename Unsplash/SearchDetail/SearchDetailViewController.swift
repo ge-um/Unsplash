@@ -7,6 +7,7 @@
 
 import SnapKit
 import UIKit
+import Kingfisher
 
 final class SearchDetailViewController: UIViewController {
     private let line: UIView = {
@@ -20,19 +21,18 @@ final class SearchDetailViewController: UIViewController {
         imageView.backgroundColor = .darkGray
         imageView.layer.cornerRadius = 22
         imageView.contentMode = .scaleAspectFill
+        imageView.clipsToBounds = true
         return imageView
     }()
     
     private let userName: UILabel = {
         let label = UILabel()
-        label.text = "Brayden Prato"
         label.font = .systemFont(ofSize: 15, weight: .light)
         return label
     }()
     
     private let createdDate: UILabel = {
         let label = UILabel()
-        label.text = "2024년 7월 3일 게시됨"
         label.font = .systemFont(ofSize: 13, weight: .bold)
         return label
     }()
@@ -83,9 +83,9 @@ final class SearchDetailViewController: UIViewController {
         return label
     }()
     
-    private let sizeInfoLabel = InfoLabel(sizeInfo: "크기", size: "3098 x 3872")
-    private let viewInfoLabel = InfoLabel(sizeInfo: "조회수", size: "1,548,623")
-    private let downloadInfoLabel = InfoLabel(sizeInfo: "다운로드", size: "388,996")
+    private let sizeInfoLabel = InfoStackView()
+    private let viewInfoLabel = InfoStackView()
+    private let downloadInfoLabel = InfoStackView()
     
     private let infoStackView: UIStackView = {
        let stackView = UIStackView()
@@ -111,6 +111,7 @@ final class SearchDetailViewController: UIViewController {
         super.viewDidLoad()
         setUpUI()
         setupNavigationBar()
+        configureData()
     }
     
     private func setUpUI() {
@@ -197,5 +198,18 @@ final class SearchDetailViewController: UIViewController {
             let barButton = UIBarButtonItem(customView: backButton)
             navigationItem.leftBarButtonItem = barButton
         }
+    }
+    
+    private func configureData() {
+        userName.text = image.user.name
+        createdDate.text = image.postDate
+        sizeInfoLabel.configureData(title: "크기", data: image.size)
+        viewInfoLabel.configureData(title: "조회수", data: "1,548,623")
+        downloadInfoLabel.configureData(title: "다운로드", data: "388,996")
+        
+        guard let profileImageURL = URL(string: image.user.profileImage.medium), let imageURL = URL(string: image.urls.raw) else { return }
+        
+        profileImage.kf.setImage(with: profileImageURL)
+        imageView.kf.setImage(with: imageURL)
     }
 }
