@@ -135,7 +135,7 @@ final class SearchViewController: UIViewController {
     }
 
     private func bindData() {
-        viewModel.output.searchResults.bind { [weak self] searchResult in
+        viewModel.output.searchResults.bind { [weak self] _ in
             guard let self = self else { return }
             self.resultCollectionView.reloadData()
         }

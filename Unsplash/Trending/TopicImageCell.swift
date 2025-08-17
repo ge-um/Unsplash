@@ -57,6 +57,12 @@ final class TopicImageCell: UICollectionViewCell, IsIdentifiable {
         }
     }
     
+    func configure(item: TopicResponse?) {
+        guard let item = item, let urlString = item.urls.small, let url = URL(string: urlString) else { return }
+        imageView.kf.setImage(with: url)
+        starButton.configuration?.attributedTitle = .init(item.formattedLikes, attributes: .init([.font: UIFont.systemFont(ofSize: 12)]))
+    }
+    
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
