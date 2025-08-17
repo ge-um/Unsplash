@@ -23,7 +23,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         tabbarController.tabBar.tintColor = .black
         tabbarController.tabBar.unselectedItemTintColor = .gray
         
-        let trendingViewController = TrendingViewController()
+        let trendingViewController = UINavigationController(rootViewController: TrendingViewController())
         trendingViewController.tabBarItem = UITabBarItem(title: nil, image: UIImage(systemName: "chart.line.uptrend.xyaxis"), tag: 0)
         
         let reelsViewController = UIViewController()
