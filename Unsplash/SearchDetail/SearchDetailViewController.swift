@@ -96,14 +96,15 @@ final class SearchDetailViewController: UIViewController {
         return stackView
     }()
     
-    let image: SearchResponse
+//    let image: SearchResponse
+    let viewModel: SearchDetailViewModel
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
     
     init(image: SearchResponse) {
-        self.image = image
+        viewModel = SearchDetailViewModel(image: image)
         super.init(nibName: nil, bundle: nil)
     }
     
@@ -111,7 +112,8 @@ final class SearchDetailViewController: UIViewController {
         super.viewDidLoad()
         setUpUI()
         setupNavigationBar()
-        configureData()
+        bindData()
+        setViewDidLoadTrigger()
     }
     
     private func setUpUI() {
@@ -200,16 +202,28 @@ final class SearchDetailViewController: UIViewController {
         }
     }
     
-    private func configureData() {
-        userName.text = image.user.name
-        createdDate.text = image.postDate
-        sizeInfoLabel.configureData(title: "크기", data: image.size)
-        viewInfoLabel.configureData(title: "조회수", data: "1,548,623")
-        downloadInfoLabel.configureData(title: "다운로드", data: "388,996")
+    private func bindData() {
+        viewModel.output.configureDataWithSearchResponse.bind { [weak self] image in
+            guard let self = self, let image = image else { return }
+            userName.text = image.user.name
+            createdDate.text = image.postDate
+            sizeInfoLabel.configureData(title: "크기", data: image.size)
+            
+            guard let profileImageURL = URL(string: image.user.profileImage.medium), let imageURL = URL(string: image.urls.raw) else { return }
+            
+            profileImage.kf.setImage(with: profileImageURL)
+            imageView.kf.setImage(with: imageURL)
+        }
         
-        guard let profileImageURL = URL(string: image.user.profileImage.medium), let imageURL = URL(string: image.urls.raw) else { return }
-        
-        profileImage.kf.setImage(with: profileImageURL)
-        imageView.kf.setImage(with: imageURL)
+        viewModel.output.statisticsResults.bind { [weak self] image in
+            guard let self = self, let image = image else { return }
+            
+            self.viewInfoLabel.configureData(title: "조회수", data: image.formattedViews)
+            self.downloadInfoLabel.configureData(title: "다운로드", data: image.formattedDownloads)
+        }
+    }
+    
+    private func setViewDidLoadTrigger() {
+        viewModel.input.viewDidLoad.value = ()
     }
 }

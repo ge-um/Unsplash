@@ -37,6 +37,7 @@ final class SearchViewModel {
         
     }
     
+    // TODO: - 오류처리
     private func fetchSearchResults() {
         NetworkManager.shared.callRequest(api: .search(keyword: "바다", page: 1, orderedBy: .latest, color: .purple), type: [SearchResponse].self) { [weak self] response in
             

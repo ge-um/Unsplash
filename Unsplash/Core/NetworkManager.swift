@@ -30,9 +30,24 @@ final class NetworkManager {
                 switch response.result {
                 case .success(let result):
                     completionHandler(.success(result))
-                case .failure:
+                case .failure(let error):
+                    print(error)
                     completionHandler(.failure(.AFError))
                 }
             }
         }
+    
+    #if DEBUG
+    func callRequest(api: APIRouter) {
+        guard let endPoint = api.endPoint else {
+            print(NetworkError.endPoint.localizedDescription)
+            return
+        }
+        
+        AF.request(endPoint, parameters: api.parameters)
+            .responseString { response in
+                print(response)
+            }
+        }
+    #endif
 }

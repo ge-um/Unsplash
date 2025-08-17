@@ -46,6 +46,8 @@ struct SearchResponse: Decodable {
     var size: String {
         return "\(width) x \(height)"
     }
+    
+    static let sample = SearchResponse(id: "", createdAt: "", width: 0, height: 0, urls: SearchURL(raw: "", small: ""), likes: 0, user: User(name: "", profileImage: Profile(medium: "")))
 }
 
 struct SearchURL: Decodable {
