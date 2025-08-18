@@ -199,7 +199,7 @@ extension SearchViewController: UICollectionViewDataSource, UICollectionViewDele
             guard let searchResults = viewModel.output.searchResults.value else {
                 return UICollectionViewCell()
             }
-            cell.configureData(search: searchResults[indexPath.item])
+            cell.configure(with: searchResults[indexPath.item])
             
             return cell
         }

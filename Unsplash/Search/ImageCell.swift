@@ -10,7 +10,6 @@ import Kingfisher
 import UIKit
 
 final class ImageCell: UICollectionViewCell, IsIdentifiable {
-    
     // TODO: - imageView placeholder
     private let imageView: UIImageView = {
         let imageView = UIImageView()
@@ -52,18 +51,21 @@ final class ImageCell: UICollectionViewCell, IsIdentifiable {
             config?.baseForegroundColor = button.isSelected ? .systemBlue : .white
             button.configuration = config
         }
-        
+                
         button.addTarget(self, action: #selector(likeButtonTapped), for: .touchUpInside)
         
         return button
     }()
     
-    private let viewModel = ImageCellViewModel()
+    private var viewModel = ImageCellViewModel()
     
     override init(frame: CGRect) {
         super.init(frame: .zero)
+        
         setUpUI()
         bind()
+        
+        viewModel.input.viewDidLoad.value = ()
     }
     
     required init?(coder: NSCoder) {
@@ -99,9 +101,9 @@ final class ImageCell: UICollectionViewCell, IsIdentifiable {
         }
     }
     
-    // TODO: - Kingfisher logic 분리?
     // TODO: - 다운샘플링 추가
-    func configureData(search: Search) {
+    func configure(with search: Search) {
+        viewModel.id = search.id
         starButton.configuration?.attributedTitle = .init("\(search.likes)", attributes: .init([.font: UIFont.systemFont(ofSize: 12)]))
 
         guard let url = URL(string: search.urls.small) else { return }
