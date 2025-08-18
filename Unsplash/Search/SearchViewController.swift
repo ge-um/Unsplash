@@ -43,7 +43,7 @@ final class SearchViewController: UIViewController {
         return collectionView
     }()
     
-    private let orderButton: UIButton = {
+    private lazy var sortButton: UIButton = {
         let button = UIButton()
         
         var config = UIButton.Configuration.bordered()
@@ -58,6 +58,7 @@ final class SearchViewController: UIViewController {
         config.contentInsets = .init(top: 0, leading: 12, bottom: 0, trailing: 36)
         
         button.configuration = config
+        button.addTarget(self, action: #selector(sortButtonTapped), for: .touchUpInside)
         
         return button
     }()
@@ -108,7 +109,7 @@ final class SearchViewController: UIViewController {
         
         view.addSubview(searchBar)
         view.addSubview(colorCollectionView)
-        view.addSubview(orderButton)
+        view.addSubview(sortButton)
         resultStackView.addArrangedSubview(resultLabel)
         resultStackView.addArrangedSubview(resultCollectionView)
         view.addSubview(resultStackView)
@@ -123,7 +124,7 @@ final class SearchViewController: UIViewController {
             make.horizontalEdges.equalTo(view.safeAreaLayoutGuide)
         }
         
-        orderButton.snp.makeConstraints { make in
+        sortButton.snp.makeConstraints { make in
             make.top.equalTo(searchBar.snp.bottom)
             make.height.equalTo(36)
             make.trailing.equalTo(view.safeAreaLayoutGuide).offset(24)
@@ -157,6 +158,16 @@ final class SearchViewController: UIViewController {
             let vc = SearchDetailViewController(image: image)
             navigationController?.pushViewController(vc, animated: true)
         }
+        
+        viewModel.output.sortButtonTitle.bind { [weak self] title in
+            guard let self = self else { return }
+            sortButton.configuration?.attributedTitle = AttributedString(title, attributes: .init([.font: UIFont.systemFont(ofSize: 14, weight: .bold)]))
+        }
+    }
+    
+    @objc private func sortButtonTapped(sender: UIButton) {
+        guard let title = sender.configuration?.title, let order = Order(rawValue: title) else { return }
+        viewModel.input.order.value = order
     }
 }
 
@@ -207,6 +218,7 @@ extension SearchViewController: UICollectionViewDataSource, UICollectionViewDele
 
 extension SearchViewController: UISearchBarDelegate {
     func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
-        viewModel.input.searchButtonTapped.value = searchBar.text
+        viewModel.input.keyword.value = searchBar.text
     }
 }
+

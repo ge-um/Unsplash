@@ -10,12 +10,14 @@ import Foundation
 final class SearchViewModel {
     struct Input {
         var imageCellTapped: Observable<Search?> = Observable(nil)
-        var searchButtonTapped: Observable<String?> = Observable(nil)
+        var keyword: Observable<String?> = Observable(nil)
+        var order: Observable<Order> = Observable(.relevant)
     }
     
     struct Output {
         var searchResults: Observable<[Search]?> = Observable(nil)
         var navigateToDetail: Observable<Search?> = Observable(nil)
+        var sortButtonTitle: Observable<String> = Observable("최신순")
     }
     
     var input: Input
@@ -30,17 +32,23 @@ final class SearchViewModel {
             self.output.navigateToDetail.value = selectedImage
         }
         
-        input.searchButtonTapped.lazyBind { [weak self] text in
+        input.keyword.lazyBind { [weak self] keyword in
             guard let self = self else { return }
-            self.fetchSearchResults(text: text)
+            self.fetchSearchResults()
+        }
+
+        input.order.bind { [weak self] order in
+            guard let self = self else { return }
+            self.fetchSearchResults()
+            self.output.sortButtonTitle.value = order == .latest ? "관련순" : "최신순"
         }
     }
     
     // TODO: - 오류처리
-    private func fetchSearchResults(text: String?) {
-        guard let keyword = text else { return }
+    private func fetchSearchResults() {
+        guard let keyword = input.keyword.value else { return }
         
-        NetworkManager.shared.callRequest(api: .search(keyword: keyword, page: 1, orderedBy: .relevant), type: SearchResponse.self) { [weak self] response in
+        NetworkManager.shared.callRequest(api: .search(keyword: keyword, page: 1, orderedBy: input.order.value), type: SearchResponse.self) { [weak self] response in
             
             guard let self = self else { return }
             
