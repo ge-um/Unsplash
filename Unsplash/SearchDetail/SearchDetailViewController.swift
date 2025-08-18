@@ -103,7 +103,7 @@ final class SearchDetailViewController: UIViewController {
         fatalError("init(coder:) has not been implemented")
     }
     
-    init(image: SearchResponse) {
+    init(image: Search) {
         viewModel = SearchDetailViewModel(image: image)
         super.init(nibName: nil, bundle: nil)
     }

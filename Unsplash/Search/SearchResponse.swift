@@ -8,6 +8,10 @@
 import Foundation
 
 struct SearchResponse: Decodable {
+    let results: [Search]
+}
+
+struct Search: Decodable {
     let id: String
     let createdAt: String
     let width: Int
@@ -47,7 +51,7 @@ struct SearchResponse: Decodable {
         return "\(width) x \(height)"
     }
     
-    static let sample = SearchResponse(id: "", createdAt: "", width: 0, height: 0, urls: SearchURL(raw: "", small: ""), likes: 0, user: User(name: "", profileImage: Profile(medium: "")))
+    static let sample = SearchResponse(results: [Search(id: "", createdAt: "", width: 0, height: 0, urls: SearchURL(raw: "", small: ""), likes: 0, user: User(name: "", profileImage: Profile(medium: "")))])
 }
 
 struct SearchURL: Decodable {

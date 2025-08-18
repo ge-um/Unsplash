@@ -13,16 +13,16 @@ class SearchDetailViewModel {
     }
     
     struct Output {
-        var configureDataWithSearchResponse: Observable<SearchResponse?> = Observable(nil)
+        var configureDataWithSearchResponse: Observable<Search?> = Observable(nil)
         var statisticsResults: Observable<StatisticsResponse?> = Observable(nil)
     }
     
     var input: Input
     var output: Output
     
-    let searchResponse: SearchResponse
+    let searchResponse: Search
         
-    init(image: SearchResponse) {
+    init(image: Search) {
         input = Input()
         output = Output()
         

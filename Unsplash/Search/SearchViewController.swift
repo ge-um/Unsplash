@@ -19,6 +19,7 @@ final class SearchViewController: UIViewController {
         let searchBar = UISearchBar()
         searchBar.placeholder = "키워드 검색"
         searchBar.searchBarStyle = .minimal
+        searchBar.delegate = self
         return searchBar
     }()
     
@@ -66,7 +67,6 @@ final class SearchViewController: UIViewController {
         label.text = "사진을 검색해보세요."
         label.font = .systemFont(ofSize: 16, weight: .bold)
         label.textAlignment = .center
-        label.isHidden = true
         
         return label
     }()
@@ -85,6 +85,7 @@ final class SearchViewController: UIViewController {
         collectionView.delegate = self
         collectionView.dataSource = self
         collectionView.tag = SearchCollectionView.result.rawValue
+        collectionView.isHidden = true
 
         return collectionView
     }()
@@ -135,9 +136,19 @@ final class SearchViewController: UIViewController {
     }
 
     private func bindData() {
-        viewModel.output.searchResults.bind { [weak self] _ in
+        viewModel.output.searchResults.lazyBind { [weak self] response in
             guard let self = self else { return }
+            
+            guard let response = response, !response.isEmpty else {
+                resultLabel.text = "검색 결과가 없습니다."
+                resultCollectionView.isHidden = true
+                resultLabel.isHidden = false
+                return
+            }
+            
             self.resultCollectionView.reloadData()
+            resultCollectionView.isHidden = false
+            resultLabel.isHidden = true
         }
         
         viewModel.output.navigateToDetail.lazyBind { [weak self] selectedImage in
@@ -191,5 +202,11 @@ extension SearchViewController: UICollectionViewDataSource, UICollectionViewDele
             }
             viewModel.input.imageCellTapped.value = searchResults[indexPath.item]
         }
+    }
+}
+
+extension SearchViewController: UISearchBarDelegate {
+    func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
+        viewModel.input.searchButtonTapped.value = searchBar.text
     }
 }

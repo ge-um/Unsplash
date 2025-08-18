@@ -88,7 +88,7 @@ final class ImageCell: UICollectionViewCell, IsIdentifiable {
     
     // TODO: - Kingfisher logic 분리?
     // TODO: - 다운샘플링 추가
-    func configureData(search: SearchResponse) {
+    func configureData(search: Search) {
         starButton.configuration?.attributedTitle = .init("\(search.likes)", attributes: .init([.font: UIFont.systemFont(ofSize: 12)]))
 
         guard let url = URL(string: search.urls.small) else { return }
