@@ -58,9 +58,19 @@ final class ImageCell: UICollectionViewCell, IsIdentifiable {
         return button
     }()
     
+    private let viewModel = ImageCellViewModel()
+    
     override init(frame: CGRect) {
         super.init(frame: .zero)
-        
+        setUpUI()
+        bind()
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+    private func setUpUI() {
         contentView.addSubview(imageView)
         contentView.addSubview(starButton)
         contentView.addSubview(likeButton)
@@ -82,8 +92,11 @@ final class ImageCell: UICollectionViewCell, IsIdentifiable {
         }
     }
     
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
+    private func bind() {
+        viewModel.output.isLiked.bind { [weak self] isLiked in
+            guard let self = self else { return }
+            likeButton.isSelected = isLiked
+        }
     }
     
     // TODO: - Kingfisher logic 분리?
@@ -95,8 +108,7 @@ final class ImageCell: UICollectionViewCell, IsIdentifiable {
         imageView.kf.setImage(with: url)
     }
     
-    // TODO: - MVVM으로 바꾸기
     @objc private func likeButtonTapped() {
-        likeButton.isSelected.toggle()
+        viewModel.input.likeButtonTapped.value = ()
     }
 }
