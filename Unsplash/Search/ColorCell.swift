@@ -50,6 +50,7 @@ final class ColorCell: UICollectionViewCell, IsIdentifiable {
         config.contentInsets = .init(top: 0, leading: 0, bottom: 0, trailing: 0)
         
         button.configuration = config
+        button.isUserInteractionEnabled = false
         
         return button
     }()

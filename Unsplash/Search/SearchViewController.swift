@@ -207,7 +207,13 @@ extension SearchViewController: UICollectionViewDataSource, UICollectionViewDele
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         
-        if collectionView == resultCollectionView {
+        guard let type = SearchCollectionView(rawValue: collectionView.tag) else { return }
+        
+        switch type {
+        case .color:
+            viewModel.input.color.value = ImageColor.allCases[indexPath.item]
+            
+        case .result:
             guard let searchResults = viewModel.output.searchResults.value else {
                 return
             }
@@ -221,4 +227,3 @@ extension SearchViewController: UISearchBarDelegate {
         viewModel.input.keyword.value = searchBar.text
     }
 }
-
