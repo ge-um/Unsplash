@@ -8,7 +8,7 @@
 import SnapKit
 import UIKit
 
-enum Topic: Int {
+enum Topic: Int, CaseIterable {
     case goldenHour
     case businessWork
     case architectureInterior
@@ -40,7 +40,6 @@ final class TopicCell: UITableViewCell, IsIdentifiable {
     private let titleLabel: UILabel = {
         let label = UILabel()
         label.font = .systemFont(ofSize: 18, weight: .bold)
-
         return label
     }()
     

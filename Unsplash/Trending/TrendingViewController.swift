@@ -52,11 +52,11 @@ final class TrendingViewController: UIViewController {
         super.viewDidLoad()
         setUpUI()
         bindData()
-        
-        viewModel.input.viewDidLoad.value = Topic(rawValue: 0)
     }
     
     private func bindData() {
+        viewModel.input.viewDidLoad.value = ()
+
         viewModel.output.topicResponses.lazyBind { [weak self] _ in
             guard let self = self else { return }
             self.tableView.reloadData()
@@ -104,19 +104,14 @@ extension TrendingViewController: UITableViewDelegate, UITableViewDataSource {
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        
         guard let cell = tableView.dequeueReusableCell(withIdentifier: TopicCell.identifier, for: indexPath) as? TopicCell else { return UITableViewCell() }
         
-        let topic = Topic(rawValue: indexPath.section)
         cell.configureData(section: indexPath.section)
         
         if let items = viewModel.output.topicResponses.value[indexPath.section] {
             cell.loadCollectionViewCell(items: items)
         }
-        
-        if viewModel.output.topicResponses.value[indexPath.section] == nil, let topic = topic {
-            viewModel.input.viewDidLoad.value = topic
-        }
+
         return cell
     }
         

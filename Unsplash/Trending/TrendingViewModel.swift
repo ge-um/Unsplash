@@ -9,7 +9,7 @@ import Foundation
 
 final class TrendingViewModel {
     struct Input {
-        var viewDidLoad: Observable<Topic?> = Observable(nil)
+        var viewDidLoad: Observable<Void> = Observable(())
     }
     
     struct Output {
@@ -24,24 +24,34 @@ final class TrendingViewModel {
         input = Input()
         output = Output()
         
-        input.viewDidLoad.lazyBind { [weak self] topic in
-            guard let self = self, let topic = topic else { return }
-            self.fetchTopicResponse(for: topic)
+        input.viewDidLoad.lazyBind { _ in
+            self.fetchTopicResponse()
         }
     }
     
-    private func fetchTopicResponse(for topic: Topic) {
-        NetworkManager.shared.callRequest(api: .topic(topicId: topic.topicId), type: [TopicResponse].self) { [weak self] result in
-            guard let self = self else { return }
+    private func fetchTopicResponse() {
+        let dispatchGroup = DispatchGroup()
+        var responses = [Int: [TopicResponse]]()
+
+        for topic in Topic.allCases {
+            dispatchGroup.enter()
             
-            switch result {
-            case .success(let response):
-                var current = self.output.topicResponses.value
-                current[topic.rawValue] = response
-                self.output.topicResponses.value = current
-            case .failure(let error):
-                self.output.showAlert.value = error.localizedDescription
+            NetworkManager.shared.callRequest(api: .topic(topicId: topic.topicId), type: [TopicResponse].self) { [weak self] result in
+                guard let self = self else { return }
+                
+                switch result {
+                case .success(let response):
+                    responses[topic.rawValue] = response
+                case .failure(let error):
+                    self.output.showAlert.value = error.localizedDescription
+                }
+                dispatchGroup.leave()
             }
+        }
+
+        dispatchGroup.notify(queue: .main) { [weak self] in
+            guard let self = self else { return }
+            self.output.topicResponses.value = responses
         }
     }
 }
