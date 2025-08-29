@@ -9,60 +9,51 @@ import SnapKit
 import UIKit
 
 final class TrendingViewController: UIViewController {
-    private lazy var tableView: UITableView = {
-        let tableView = UITableView()
-        
-        tableView.sectionHeaderTopPadding = 0
-        tableView.separatorStyle = .none
-        tableView.showsVerticalScrollIndicator = false
-                
-        tableView.delegate = self
-        tableView.dataSource = self
-        
-        tableView.register(TopicCell.self, forCellReuseIdentifier: TopicCell.identifier)
-        
-        return tableView
+    private let headerView = UIView()
+    
+    private let titleLabel: UILabel = {
+        let label = UILabel()
+        label.font = .systemFont(ofSize: 28, weight: .bold)
+        label.text = "OUR TOPIC"
+        return label
     }()
     
     private let profileButton: UIButton = {
         let button = UIButton()
-        
         var config = UIButton.Configuration.plain()
         config.image = UIImage(systemName: "star")
         config.background.cornerRadius = 22
         config.background.strokeColor = .tintColor
-        config.background.strokeWidth = 5
+        config.background.strokeWidth = 3
         config.background.backgroundColor = .systemGray4
-        
         button.configuration = config
-        
         return button
     }()
     
+    private lazy var tableView: UITableView = {
+        let tableView = UITableView()
+        tableView.sectionHeaderTopPadding = 0
+        tableView.separatorStyle = .none
+        tableView.showsVerticalScrollIndicator = false
+        tableView.delegate = self
+        tableView.dataSource = self
+        tableView.register(TopicCell.self, forCellReuseIdentifier: TopicCell.identifier)
+        return tableView
+    }()
+    
     private let viewModel = TrendingViewModel()
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(true)
+        navigationController?.setNavigationBarHidden(true, animated: false)
+    }
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        setUpNavigationBar()
         setUpUI()
         bindData()
         
         viewModel.input.viewDidLoad.value = Topic(rawValue: 0)
-    }
-    
-    private func setUpUI() {
-        view.addSubview(tableView)
-        
-        tableView.snp.makeConstraints { make in
-            make.edges.equalTo(view.safeAreaLayoutGuide)
-        }
-    }
-    
-    private func setUpNavigationBar() {
-        navigationItem.title = "OUR TOPIC"
-        navigationItem.largeTitleDisplayMode = .always
-        navigationController?.navigationBar.prefersLargeTitles = true
-        navigationItem.rightBarButtonItem = UIBarButtonItem(customView: profileButton)
     }
     
     private func bindData() {
@@ -73,6 +64,36 @@ final class TrendingViewController: UIViewController {
         
         viewModel.output.showAlert.lazyBind { [weak self] message in
             self?.showAlert(title: "오류", message: message)
+        }
+    }
+}
+
+extension TrendingViewController {
+    private func setUpUI() {
+        headerView.addSubview(titleLabel)
+        headerView.addSubview(profileButton)
+        view.addSubview(headerView)
+        view.addSubview(tableView)
+        
+        titleLabel.snp.makeConstraints { make in
+            make.leading.equalToSuperview().inset(16)
+            make.bottom.equalToSuperview().inset(4)
+            make.bottom.equalToSuperview()
+        }
+        
+        profileButton.snp.makeConstraints { make in
+            make.top.trailing.equalToSuperview().inset(8)
+            make.size.equalTo(32)
+        }
+        
+        headerView.snp.makeConstraints { make in
+            make.top.horizontalEdges.equalTo(view.safeAreaLayoutGuide)
+            make.height.equalTo(80)
+        }
+        
+        tableView.snp.makeConstraints { make in
+            make.top.equalTo(headerView.snp.bottom)
+            make.horizontalEdges.bottom.equalTo(view.safeAreaLayoutGuide)
         }
     }
 }
