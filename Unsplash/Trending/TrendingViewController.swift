@@ -18,7 +18,7 @@ final class TrendingViewController: UIViewController {
         return label
     }()
     
-    private let profileButton: UIButton = {
+    private lazy var profileButton: UIButton = {
         let button = UIButton()
         var config = UIButton.Configuration.plain()
         config.image = UIImage(systemName: "star")
@@ -27,6 +27,8 @@ final class TrendingViewController: UIViewController {
         config.background.strokeWidth = 3
         config.background.backgroundColor = .systemGray4
         button.configuration = config
+        
+        button.addTarget(self, action: #selector(navigate), for: .touchUpInside)
         return button
     }()
     
@@ -65,6 +67,11 @@ final class TrendingViewController: UIViewController {
         viewModel.output.showAlert.lazyBind { [weak self] message in
             self?.showAlert(title: "오류", message: message)
         }
+    }
+    
+    @objc func navigate() {
+        let vc = MbtiViewController()
+        self.navigationController?.pushViewController(vc, animated: true)
     }
 }
 
