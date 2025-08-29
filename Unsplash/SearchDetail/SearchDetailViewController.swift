@@ -96,7 +96,6 @@ final class SearchDetailViewController: UIViewController {
         return stackView
     }()
     
-//    let image: SearchResponse
     let viewModel: SearchDetailViewModel
     
     required init?(coder: NSCoder) {
@@ -220,6 +219,10 @@ final class SearchDetailViewController: UIViewController {
             
             self.viewInfoLabel.configureData(title: "조회수", data: image.formattedViews)
             self.downloadInfoLabel.configureData(title: "다운로드", data: image.formattedDownloads)
+        }
+        
+        viewModel.output.errorMessage.lazyBind { [weak self] message in
+            self?.showAlert(title: "오류", message: message)
         }
     }
     

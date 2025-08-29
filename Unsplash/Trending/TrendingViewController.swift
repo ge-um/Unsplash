@@ -70,9 +70,13 @@ final class TrendingViewController: UIViewController {
             guard let self = self else { return }
             self.tableView.reloadData()
         }
+        
+        viewModel.output.showAlert.lazyBind { [weak self] message in
+            self?.showAlert(title: "오류", message: message)
+        }
     }
 }
-
+ 
 extension TrendingViewController: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return 1

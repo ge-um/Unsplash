@@ -163,6 +163,10 @@ final class SearchViewController: UIViewController {
             guard let self = self else { return }
             sortButton.configuration?.attributedTitle = AttributedString(title, attributes: .init([.font: UIFont.systemFont(ofSize: 14, weight: .bold)]))
         }
+        
+        viewModel.output.errorMessage.lazyBind { [weak self] message in
+            self?.showAlert(title: "오류", message: message)
+        }
     }
     
     @objc private func sortButtonTapped(sender: UIButton) {

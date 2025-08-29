@@ -19,6 +19,7 @@ final class SearchViewModel {
         var searchResults: Observable<[Search]?> = Observable(nil)
         var navigateToDetail: Observable<Search?> = Observable(nil)
         var sortButtonTitle: Observable<String> = Observable("최신순")
+        var errorMessage: Observable<String?> = Observable(nil)
     }
     
     var input: Input
@@ -50,7 +51,6 @@ final class SearchViewModel {
         }
     }
     
-    // TODO: - 오류처리
     private func fetchSearchResults() {
         guard let keyword = input.keyword.value else { return }
         
@@ -62,7 +62,7 @@ final class SearchViewModel {
             case .success(let searchResponse):
                 output.searchResults.value = searchResponse.results
             case .failure(let failure):
-                print(failure)
+                output.errorMessage.value = failure.localizedDescription
             }
         }
     }

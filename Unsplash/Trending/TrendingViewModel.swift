@@ -14,6 +14,7 @@ final class TrendingViewModel {
     
     struct Output {
         var topicResponses: Observable<[Int: [TopicResponse]]> = Observable([:])
+        var showAlert: Observable<String> = Observable("")
     }
     
     var input: Input
@@ -29,9 +30,7 @@ final class TrendingViewModel {
         }
     }
     
-    // TODO: - 에러 처리
     private func fetchTopicResponse(for topic: Topic) {
-        guard let topicId = input.viewDidLoad.value else { return }
         NetworkManager.shared.callRequest(api: .topic(topicId: topic.topicId), type: [TopicResponse].self) { [weak self] result in
             guard let self = self else { return }
             
@@ -41,7 +40,7 @@ final class TrendingViewModel {
                 current[topic.rawValue] = response
                 self.output.topicResponses.value = current
             case .failure(let error):
-                print(error)
+                self.output.showAlert.value = error.localizedDescription
             }
         }
     }

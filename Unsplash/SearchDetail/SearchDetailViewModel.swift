@@ -15,6 +15,7 @@ class SearchDetailViewModel {
     struct Output {
         var configureDataWithSearchResponse: Observable<Search?> = Observable(nil)
         var statisticsResults: Observable<StatisticsResponse?> = Observable(nil)
+        var errorMessage: Observable<String?> = Observable(nil)
     }
     
     var input: Input
@@ -36,7 +37,6 @@ class SearchDetailViewModel {
         }
     }
     
-    // TODO: - 에러 처리
     private func fetchStatisticsResults(imageId: String) {
         NetworkManager.shared.callRequest(api: .statistics(imageId: imageId), type: StatisticsResponse.self) { [weak self] response in
             guard let self = self else { return }
@@ -44,7 +44,7 @@ class SearchDetailViewModel {
             case .success(let statistics):
                 self.output.statisticsResults.value = statistics
             case .failure(let failure):
-                print(failure)
+                self.output.errorMessage.value = failure.localizedDescription
             }
         }
     }

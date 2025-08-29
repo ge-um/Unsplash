@@ -8,9 +8,30 @@
 import Alamofire
 import Foundation
 
-enum NetworkError: Error {
-    case endPoint
-    case AFError
+enum NetworkError: Int, Error {
+    case badRequest = 400
+    case unauthorized = 401
+    case forbidden = 403
+    case notFound = 404
+    case serverError = 500
+    case unknown = 503
+    
+    var localizedDescription: String {
+        switch self {
+        case .badRequest:
+            "BAD REQUEST"
+        case .unauthorized:
+            "UNAURHORIZED"
+        case .forbidden:
+            "FORBIDDEN"
+        case .notFound:
+            "NOT FOUND"
+        case .serverError:
+            "SERVER ERROR"
+        case .unknown:
+            "UNKNOWN ERROR"
+        }
+    }
 }
 
 final class NetworkManager {
@@ -20,27 +41,30 @@ final class NetworkManager {
     
     func callRequest<T: Decodable>(api: APIRouter, type: T.Type, completionHandler: @escaping (Result<T, NetworkError>) -> Void) {
         guard let endPoint = api.endPoint else {
-            completionHandler(.failure(.endPoint))
+            #if DEBUG
+            print("Invalid URL")
+            #endif
             return
         }
         
-        // TODO: - 에러 핸들링
         AF.request(endPoint, parameters: api.parameters)
             .responseDecodable(of: T.self) { response in
                 switch response.result {
                 case .success(let result):
                     completionHandler(.success(result))
-                case .failure(let error):
-                    print(error)
-                    completionHandler(.failure(.AFError))
+                case .failure:
+                    let statusCode = response.response?.statusCode ?? 500
+                    let errorType = NetworkError(rawValue: statusCode)
+                    
+                    completionHandler(.failure((errorType ?? .unknown)))
                 }
             }
-        }
+    }
     
     #if DEBUG
     func callRequest(api: APIRouter) {
         guard let endPoint = api.endPoint else {
-            print(NetworkError.endPoint.localizedDescription)
+            print("Invalid URL")
             return
         }
         
