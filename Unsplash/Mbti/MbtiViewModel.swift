@@ -47,37 +47,31 @@ final class MbtiViewModel: BaseViewModel {
             .map { isValid in
                 isValid ? "사용할 수 있는 닉네임이에요." : "잘못된 닉네임입니다."
             }
-            .asDriver(onErrorJustReturn: "")
         
         let nicknameValidationColor = nicknameValidationResult
-            .asDriver(onErrorJustReturn: false)
         
         let selectedEiButtonTag = Observable.merge(
             input.eButtonTapped.map { 1 },
             input.iButtonTapped.map { 2 }
         )
-            .asDriver(onErrorJustReturn: 0)
         
         let selectedSnButtonTag = Observable.merge(
             input.sButtonTapped.map { 1 },
             input.nButtonTapped.map { 2 }
         )
-            .asDriver(onErrorJustReturn: 0)
         
         let selectedTfButtonTag = Observable.merge(
             input.tButtonTapped.map { 1 },
             input.fButtonTapped.map { 2 }
         )
-            .asDriver(onErrorJustReturn: 0)
         
         let selectedJpButtonTag = Observable.merge(
             input.jButtonTapped.map { 1 },
             input.pButtonTapped.map { 2 }
         )
-            .asDriver(onErrorJustReturn: 0)
         
-        let validationResult = Driver.combineLatest(
-            nicknameValidationResult.asDriver(onErrorJustReturn: false),
+        let validationResult = Observable.combineLatest(
+            nicknameValidationResult,
             selectedEiButtonTag,
             selectedSnButtonTag,
             selectedTfButtonTag,
@@ -86,19 +80,18 @@ final class MbtiViewModel: BaseViewModel {
             .map { isValidNickname, ei, sn, tf, jp in
                 return isValidNickname && ei != 0 && sn != 0 && tf != 0 && jp != 0
             }
-            .asDriver(onErrorJustReturn: false)
         
         let navigate = input.completeButtonTapped
-            .asDriver(onErrorJustReturn: ())
-        
+            
         return Output(
-            nicknameValidationText: nicknameValidationText,
-            nicknameValidationColor: nicknameValidationColor,
-            selectedEiButtonTag: selectedEiButtonTag,
-            selectedSnButtonTag: selectedSnButtonTag,
-            selectedTfButtonTag: selectedTfButtonTag,
-            selectedJpButtonTag: selectedJpButtonTag,
-            validationResult: validationResult, navigate: navigate,
+            nicknameValidationText: nicknameValidationText.asDriver(onErrorJustReturn: ""),
+            nicknameValidationColor: nicknameValidationColor.asDriver(onErrorJustReturn: false),
+            selectedEiButtonTag: selectedEiButtonTag.asDriver(onErrorJustReturn: 0),
+            selectedSnButtonTag: selectedSnButtonTag.asDriver(onErrorJustReturn: 0),
+            selectedTfButtonTag: selectedTfButtonTag.asDriver(onErrorJustReturn: 0),
+            selectedJpButtonTag: selectedJpButtonTag.asDriver(onErrorJustReturn: 0),
+            validationResult: validationResult.asDriver(onErrorJustReturn: false),
+            navigate: navigate.asDriver(onErrorJustReturn: ()),
         )
     }
         
