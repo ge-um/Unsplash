@@ -14,7 +14,6 @@ enum SearchCollectionView: Int {
 }
 
 final class SearchViewController: UIViewController {
-    
     private lazy var searchBar: UISearchBar = {
         let searchBar = UISearchBar()
         searchBar.placeholder = "키워드 검색"
@@ -32,9 +31,7 @@ final class SearchViewController: UIViewController {
         layout.itemSize = .init(width: 100, height: 36)
         
         let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
-        
         collectionView.showsHorizontalScrollIndicator = false
-        
         collectionView.register(ColorCell.self, forCellWithReuseIdentifier: ColorCell.identifier)
         collectionView.dataSource = self
         collectionView.delegate = self
@@ -48,7 +45,6 @@ final class SearchViewController: UIViewController {
         
         var config = UIButton.Configuration.bordered()
         config.image = UIImage(systemName: "list.bullet.indent", withConfiguration: UIImage.SymbolConfiguration(pointSize: 14, weight: .regular))
-        
         config.attributedTitle = AttributedString("최신순", attributes: .init([.font: UIFont.systemFont(ofSize: 14, weight: .bold)]))
         config.background.backgroundColor = .white
         config.baseForegroundColor = .black
@@ -140,7 +136,7 @@ final class SearchViewController: UIViewController {
         viewModel.output.searchResults.lazyBind { [weak self] response in
             guard let self = self else { return }
             
-            guard let response = response, !response.isEmpty else {
+            guard !response.isEmpty else {
                 resultLabel.text = "검색 결과가 없습니다."
                 resultCollectionView.isHidden = true
                 resultLabel.isHidden = false
@@ -183,7 +179,7 @@ extension SearchViewController: UICollectionViewDataSource, UICollectionViewDele
         case .color:
             return ImageColor.allCases.count
         case .result:
-            return viewModel.output.searchResults.value?.count ?? 0
+            return viewModel.output.searchResults.value.count
         }
     }
     
@@ -200,9 +196,7 @@ extension SearchViewController: UICollectionViewDataSource, UICollectionViewDele
         case .result:
             guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: ImageCell.identifier, for: indexPath) as? ImageCell else { return UICollectionViewCell() }
             
-            guard let searchResults = viewModel.output.searchResults.value else {
-                return UICollectionViewCell()
-            }
+            let searchResults = viewModel.output.searchResults.value
             cell.configure(with: searchResults[indexPath.item])
             
             return cell
@@ -210,7 +204,6 @@ extension SearchViewController: UICollectionViewDataSource, UICollectionViewDele
     }
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        
         guard let type = SearchCollectionView(rawValue: collectionView.tag) else { return }
         
         switch type {
@@ -218,16 +211,25 @@ extension SearchViewController: UICollectionViewDataSource, UICollectionViewDele
             viewModel.input.color.value = ImageColor.allCases[indexPath.item]
             
         case .result:
-            guard let searchResults = viewModel.output.searchResults.value else {
-                return
-            }
+            let searchResults = viewModel.output.searchResults.value
             viewModel.input.imageCellTapped.value = searchResults[indexPath.item]
+        }
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
+        let results = viewModel.output.searchResults.value
+        
+        if indexPath.item == results.count - 3 {
+            viewModel.input.page.value += 20
         }
     }
 }
 
 extension SearchViewController: UISearchBarDelegate {
     func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
+        viewModel.output.searchResults.value = []
+        viewModel.input.page.value = 1
         viewModel.input.keyword.value = searchBar.text
+        resultCollectionView.scrollToItem(at: IndexPath(index: .zero), at: .top, animated: true)
     }
 }

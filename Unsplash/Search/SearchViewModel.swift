@@ -13,10 +13,11 @@ final class SearchViewModel {
         var keyword: CustomObservable<String?> = CustomObservable(nil)
         var order: CustomObservable<Order> = CustomObservable(.relevant)
         var color: CustomObservable<ImageColor?> = CustomObservable(nil)
+        var page: CustomObservable<Int> = CustomObservable(1)
     }
     
     struct Output {
-        var searchResults: CustomObservable<[Search]?> = CustomObservable(nil)
+        var searchResults: CustomObservable<[Search]> = CustomObservable([])
         var navigateToDetail: CustomObservable<Search?> = CustomObservable(nil)
         var sortButtonTitle: CustomObservable<String> = CustomObservable("최신순")
         var errorMessage: CustomObservable<String?> = CustomObservable(nil)
@@ -49,18 +50,23 @@ final class SearchViewModel {
             guard let self = self else { return }
             self.fetchSearchResults()
         }
+        
+        input.page.lazyBind { [weak self] page in
+            guard let self = self else { return }
+            self.fetchSearchResults()
+        }
     }
     
     private func fetchSearchResults() {
         guard let keyword = input.keyword.value else { return }
         
-        NetworkManager.shared.callRequest(api: .search(keyword: keyword, page: 1, orderedBy: input.order.value, color: input.color.value), type: SearchResponse.self) { [weak self] response in
+        NetworkManager.shared.callRequest(api: .search(keyword: keyword, page: input.page.value, orderedBy: input.order.value, color: input.color.value), type: SearchResponse.self) { [weak self] response in
             
             guard let self = self else { return }
             
             switch response {
             case .success(let searchResponse):
-                output.searchResults.value = searchResponse.results
+                output.searchResults.value += searchResponse.results
             case .failure(let failure):
                 output.errorMessage.value = failure.localizedDescription
             }
