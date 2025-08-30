@@ -5,6 +5,8 @@
 //  Created by 금가경 on 8/10/25.
 //
 
+import RxCocoa
+import RxSwift
 import SnapKit
 import UIKit
 
@@ -34,7 +36,6 @@ final class MbtiViewController: UIViewController {
        let textField = UITextField()
         textField.attributedPlaceholder = NSAttributedString(string: "닉네임을 입력해주세요 :)", attributes: [.foregroundColor: UIColor.C_2, .font: UIFont.systemFont(ofSize: 15)])
         textField.textColor = .black
-        textField.addTarget(self, action: #selector(textFieldEditingChanged), for: .editingChanged)
         return textField
     }()
     
@@ -76,10 +77,10 @@ final class MbtiViewController: UIViewController {
         return label
     }()
     
-    private let eiButtonView = MbtiButtonView(title1: "E", title2: "I", type: .ei)
-    private let snButtonView = MbtiButtonView(title1: "S", title2: "N", type: .sn)
-    private let tfButtonView = MbtiButtonView(title1: "T", title2: "F", type: .tf)
-    private let jpButtonView = MbtiButtonView(title1: "J", title2: "P", type: .jp)
+    private let eiButtonView = MbtiButtonView(title1: "E", title2: "I")
+    private let snButtonView = MbtiButtonView(title1: "S", title2: "N")
+    private let tfButtonView = MbtiButtonView(title1: "T", title2: "F")
+    private let jpButtonView = MbtiButtonView(title1: "J", title2: "P")
     
     private let buttonStackView: UIStackView = {
         let stackView = UIStackView()
@@ -89,6 +90,8 @@ final class MbtiViewController: UIViewController {
         return stackView
     }()
     
+    let disposeBag = DisposeBag()
+    
     private let viewModel = MbtiViewModel()
     
     override func viewDidLoad() {
@@ -97,24 +100,81 @@ final class MbtiViewController: UIViewController {
         view.backgroundColor = .white
         setUpNavigationBar()
         setUpUI()
-        setUpAction()
-        bindViewModel()
+        bind()
     }
-    
-    override func viewWillDisappear(_ animated: Bool) {
-        super.viewWillDisappear(true)
-        nicknameTextField.text = nil
-        viewModel.output.stateText.value = nil
+
+    private func bind() {
+        let input = MbtiViewModel.Input(nickname: nicknameTextField.rx.text.orEmpty.asObservable(),
+                                        eButtonTapped: eiButtonView.btn1.rx.tap.asObservable(),
+                                        iButtonTapped: eiButtonView.btn2.rx.tap.asObservable(),
+                                        sButtonTapped: snButtonView.btn1.rx.tap.asObservable(),
+                                        nButtonTapped: snButtonView.btn2.rx.tap.asObservable(),
+                                        tButtonTapped: tfButtonView.btn1.rx.tap.asObservable(),
+                                        fButtonTapped: tfButtonView.btn2.rx.tap.asObservable(),
+                                        jButtonTapped: jpButtonView.btn1.rx.tap.asObservable(),
+                                        pButtonTapped: jpButtonView.btn2.rx.tap.asObservable(), completeButtonTapped: completeButton.rx.tap.asObservable(),
+        )
+        let output = viewModel.transform(input: input)
+
+        output.nicknameValidationText
+            .drive(stateLabel.rx.text)
+            .disposed(by: disposeBag)
         
-        viewModel.input.selectedButtonTitle.value = (nil, nil, nil, nil)
+        output.nicknameValidationColor
+            .map { $0 ? .C_1 : .C_3 }
+            .drive(stateLabel.rx.textColor)
+            .disposed(by: disposeBag)
         
+        output.selectedEiButtonTag
+            .drive(with: self) { owner, tag in
+                owner.eiButtonView.arrangedSubviews.forEach { view in
+                    guard let button = view as? UIButton else { return }
+                    button.isSelected = button.tag == tag
+                }
+            }
+            .disposed(by: disposeBag)
         
-        [eiButtonView, snButtonView, tfButtonView, jpButtonView].forEach { buttonView in
-            buttonView.button1.isSelected = false
-            buttonView.button2.isSelected = false
-        }
+        output.selectedSnButtonTag
+            .drive(with: self) { owner, tag in
+                owner.snButtonView.arrangedSubviews.forEach { view in
+                    guard let button = view as? UIButton else { return }
+                    button.isSelected = button.tag == tag
+                }
+            }
+            .disposed(by: disposeBag)
+        
+        output.selectedTfButtonTag
+            .drive(with: self) { owner, tag in
+                owner.tfButtonView.arrangedSubviews.forEach { view in
+                    guard let button = view as? UIButton else { return }
+                    button.isSelected = button.tag == tag
+                }
+            }
+            .disposed(by: disposeBag)
+        
+        output.selectedJpButtonTag
+            .drive(with: self) { owner, tag in
+                owner.jpButtonView.arrangedSubviews.forEach { view in
+                    guard let button = view as? UIButton else { return }
+                    button.isSelected = button.tag == tag
+                }
+            }
+            .disposed(by: disposeBag)
+        
+        output.validationResult
+            .drive(completeButton.rx.isEnabled)
+            .disposed(by: disposeBag)
+        
+        output.navigate
+            .drive(with: self) { owner, _ in
+                let vc = ProfileSettingViewController()
+                owner.navigationController?.pushViewController(vc, animated: true)
+            }
+            .disposed(by: disposeBag)
     }
-    
+}
+
+extension MbtiViewController {
     private func setUpUI() {
         view.addSubview(navigationLine)
         view.addSubview(profileImageView)
@@ -200,70 +260,5 @@ final class MbtiViewController: UIViewController {
             let barButton = UIBarButtonItem(customView: backButton)
             navigationItem.leftBarButtonItem = barButton
         }
-    }
-    
-    private func setUpAction() {
-        completeButton.addTarget(self, action: #selector(completeButtonTapped), for: .touchUpInside)
-        
-        eiButtonView.button1.addTarget(self, action: #selector(buttonTapped), for: .touchUpInside)
-        eiButtonView.button2.addTarget(self, action: #selector(buttonTapped), for: .touchUpInside)
-        snButtonView.button1.addTarget(self, action: #selector(buttonTapped), for: .touchUpInside)
-        snButtonView.button2.addTarget(self, action: #selector(buttonTapped), for: .touchUpInside)
-        tfButtonView.button1.addTarget(self, action: #selector(buttonTapped), for: .touchUpInside)
-        tfButtonView.button2.addTarget(self, action: #selector(buttonTapped), for: .touchUpInside)
-        jpButtonView.button1.addTarget(self, action: #selector(buttonTapped), for: .touchUpInside)
-        jpButtonView.button2.addTarget(self, action: #selector(buttonTapped), for: .touchUpInside)
-
-    }
-    
-    private func bindViewModel() {
-        viewModel.output.stateText.bind { [unowned self] stateText in
-            self.stateLabel.text = self.viewModel.output.stateText.value
-        }
-        
-        viewModel.output.stateTextColor.bind { [unowned self] color in
-            self.stateLabel.textColor = color ? .C_1 : .C_3
-        }
-        
-        viewModel.output.mbtiValidation.bind { [unowned self] validation in
-            self.completeButton.isEnabled = validation && viewModel.output.stateValidation.value
-        }
-        
-        viewModel.output.stateValidation.bind { [unowned self] validation in
-            self.completeButton.isEnabled = validation && viewModel.output.mbtiValidation.value
-        }
-    }
-    
-    @objc private func textFieldEditingChanged() {
-        viewModel.input.nickname.value = nicknameTextField.text
-    }
-    
-    @objc private func buttonTapped(sender: UIButton) {
-        guard let mbtiButtonView = sender.superview as? MbtiButtonView else {
-            return
-        }
-
-        mbtiButtonView.arrangedSubviews.forEach { view in
-            guard let button = view as? UIButton else { return }
-            button.isSelected = (sender == button)
-        }
-        
-        mbtiButtonView.selectedTitle = sender.configuration?.title
-        
-        switch mbtiButtonView.type {
-        case .ei:
-            viewModel.input.selectedButtonTitle.value.ei = mbtiButtonView.selectedTitle
-        case .sn:
-            viewModel.input.selectedButtonTitle.value.sn = mbtiButtonView.selectedTitle
-        case .tf:
-            viewModel.input.selectedButtonTitle.value.tf = mbtiButtonView.selectedTitle
-        case .jp:
-            viewModel.input.selectedButtonTitle.value.jp = mbtiButtonView.selectedTitle
-        }
-    }
-    
-    @objc private func completeButtonTapped() {
-        let vc = ProfileSettingViewController()
-        navigationController?.pushViewController(vc, animated: true)
     }
 }

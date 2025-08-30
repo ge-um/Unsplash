@@ -9,12 +9,12 @@ import Foundation
 
 final class ImageCellViewModel {
     struct Input {
-        var likeButtonTapped: Observable<Void> = Observable(())
-        var viewDidLoad: Observable<Void> = Observable(())
+        var likeButtonTapped: CustomObservable<Void> = CustomObservable(())
+        var viewDidLoad: CustomObservable<Void> = CustomObservable(())
     }
     
     struct Output {
-        var isLiked: Observable<Bool> = Observable(false)
+        var isLiked: CustomObservable<Bool> = CustomObservable(false)
     }
     
     var input: Input

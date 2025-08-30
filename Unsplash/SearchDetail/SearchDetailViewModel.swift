@@ -9,13 +9,13 @@ import Foundation
 
 class SearchDetailViewModel {
     struct Input {
-        var viewDidLoad: Observable<Void> = Observable(())
+        var viewDidLoad: CustomObservable<Void> = CustomObservable(())
     }
     
     struct Output {
-        var configureDataWithSearchResponse: Observable<Search?> = Observable(nil)
-        var statisticsResults: Observable<StatisticsResponse?> = Observable(nil)
-        var errorMessage: Observable<String?> = Observable(nil)
+        var configureDataWithSearchResponse: CustomObservable<Search?> = CustomObservable(nil)
+        var statisticsResults: CustomObservable<StatisticsResponse?> = CustomObservable(nil)
+        var errorMessage: CustomObservable<String?> = CustomObservable(nil)
     }
     
     var input: Input

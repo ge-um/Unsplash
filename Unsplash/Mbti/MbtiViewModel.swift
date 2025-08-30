@@ -5,50 +5,104 @@
 //  Created by 금가경 on 8/10/25.
 //
 
-final class MbtiViewModel {
+import RxCocoa
+import RxSwift
+
+final class MbtiViewModel: BaseViewModel {
     struct Input {
-        var nickname: Observable<String?> = Observable(nil)
-        var selectedButtonTitle: Observable<(ei: String?, sn: String?, tf: String?, jp: String?)> = Observable((nil, nil, nil, nil))
+        let nickname: Observable<String>
+        let eButtonTapped: Observable<Void>
+        let iButtonTapped: Observable<Void>
+        let sButtonTapped: Observable<Void>
+        let nButtonTapped: Observable<Void>
+        let tButtonTapped: Observable<Void>
+        let fButtonTapped: Observable<Void>
+        let jButtonTapped: Observable<Void>
+        let pButtonTapped: Observable<Void>
+        let completeButtonTapped: Observable<Void>
     }
     
     struct Output {
-        var stateValidation: Observable<Bool> = Observable(false)
-        var stateText: Observable<String?> = Observable(nil)
-        var stateTextColor: Observable<Bool> = Observable(false)
-        var mbtiValidation: Observable<Bool> = Observable(false)
-        var isComplete: Observable<Bool> = Observable(false)
+        let nicknameValidationText: Driver<String>
+        let nicknameValidationColor: Driver<Bool>
+        let selectedEiButtonTag: Driver<Int>
+        let selectedSnButtonTag: Driver<Int>
+        let selectedTfButtonTag: Driver<Int>
+        let selectedJpButtonTag: Driver<Int>
+        let validationResult: Driver<Bool>
+        let navigate: Driver<Void>
     }
-    
-    var input: Input
-    var output: Output
-    
-    init() {
-        input = Input()
-        output = Output()
 
-        input.nickname.bind { [unowned self] nickname in
-            guard nickname != nil else {
-                return
-            }
-            self.evaluateNicknameValidation()
-        }
-        
-        input.selectedButtonTitle.lazyBind { [unowned self] (ei, sn, tf, jp) in
-            self.evaluateMBTIValidation(ei, sn, tf, jp)
-        }
-        
-        output.stateValidation.lazyBind { [unowned self] validation in
-            self.evaluateComplete()
-        }
-        
-        output.mbtiValidation.lazyBind { [unowned self] validation in
-            self.evaluateComplete()
-        }
-    }
+    let disposeBag = DisposeBag()
     
-    private func validate() throws (NicknameValidationError) {
-        guard let nickname = input.nickname.value else { throw .nil }
+    func transform(input: Input) -> Output {
+        let nicknameValidationResult = input.nickname
+            .filter { !$0.isEmpty }
+            .withUnretained(self)
+            .flatMap { owner, nickname in
+                owner.evaluateNicknameValidation(nickname: nickname)
+            }
         
+        let nicknameValidationText = nicknameValidationResult
+            .map { isValid in
+                isValid ? "사용할 수 있는 닉네임이에요." : "잘못된 닉네임입니다."
+            }
+            .asDriver(onErrorJustReturn: "")
+        
+        let nicknameValidationColor = nicknameValidationResult
+            .asDriver(onErrorJustReturn: false)
+        
+        let selectedEiButtonTag = Observable.merge(
+            input.eButtonTapped.map { 1 },
+            input.iButtonTapped.map { 2 }
+        )
+            .asDriver(onErrorJustReturn: 0)
+        
+        let selectedSnButtonTag = Observable.merge(
+            input.sButtonTapped.map { 1 },
+            input.nButtonTapped.map { 2 }
+        )
+            .asDriver(onErrorJustReturn: 0)
+        
+        let selectedTfButtonTag = Observable.merge(
+            input.tButtonTapped.map { 1 },
+            input.fButtonTapped.map { 2 }
+        )
+            .asDriver(onErrorJustReturn: 0)
+        
+        let selectedJpButtonTag = Observable.merge(
+            input.jButtonTapped.map { 1 },
+            input.pButtonTapped.map { 2 }
+        )
+            .asDriver(onErrorJustReturn: 0)
+        
+        let validationResult = Driver.combineLatest(
+            nicknameValidationResult.asDriver(onErrorJustReturn: false),
+            selectedEiButtonTag,
+            selectedSnButtonTag,
+            selectedTfButtonTag,
+            selectedJpButtonTag
+        )
+            .map { isValidNickname, ei, sn, tf, jp in
+                return isValidNickname && ei != 0 && sn != 0 && tf != 0 && jp != 0
+            }
+            .asDriver(onErrorJustReturn: false)
+        
+        let navigate = input.completeButtonTapped
+            .asDriver(onErrorJustReturn: ())
+        
+        return Output(
+            nicknameValidationText: nicknameValidationText,
+            nicknameValidationColor: nicknameValidationColor,
+            selectedEiButtonTag: selectedEiButtonTag,
+            selectedSnButtonTag: selectedSnButtonTag,
+            selectedTfButtonTag: selectedTfButtonTag,
+            selectedJpButtonTag: selectedJpButtonTag,
+            validationResult: validationResult, navigate: navigate,
+        )
+    }
+        
+    private func validate(nickname: String) throws (NicknameValidationError) {
         guard (2..<10) ~= nickname.count else {
             throw .outOfRange
         }
@@ -62,25 +116,16 @@ final class MbtiViewModel {
         }
     }
     
-    private func evaluateNicknameValidation() {
-        do {
-            try validate()
-            output.stateText.value = "사용할 수 있는 닉네임이에요."
-            output.stateTextColor.value = true
-            output.stateValidation.value = true
-        } catch {
-            output.stateText.value = error.errorDescription
-            output.stateTextColor.value = false
-            output.stateValidation.value = false
+    private func evaluateNicknameValidation(nickname: String) -> Observable<Bool> {
+        Observable.create { [weak self] observer in
+            do {
+                try self?.validate(nickname: nickname)
+                observer.onNext(true)
+            } catch {
+                observer.onNext(false)
+            }
+            return Disposables.create()
         }
-    }
-    
-    private func evaluateMBTIValidation(_ ei: String?, _ sn: String?, _ tf: String?, _ jp: String?) {
-        output.mbtiValidation.value = ei != nil && sn != nil && tf != nil && jp != nil
-    }
-    
-    private func evaluateComplete() {
-        output.isComplete.value = output.mbtiValidation.value && output.stateValidation.value
     }
 }
 

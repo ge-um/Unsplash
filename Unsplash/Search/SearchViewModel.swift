@@ -9,17 +9,17 @@ import Foundation
 
 final class SearchViewModel {
     struct Input {
-        var imageCellTapped: Observable<Search?> = Observable(nil)
-        var keyword: Observable<String?> = Observable(nil)
-        var order: Observable<Order> = Observable(.relevant)
-        var color: Observable<ImageColor?> = Observable(nil)
+        var imageCellTapped: CustomObservable<Search?> = CustomObservable(nil)
+        var keyword: CustomObservable<String?> = CustomObservable(nil)
+        var order: CustomObservable<Order> = CustomObservable(.relevant)
+        var color: CustomObservable<ImageColor?> = CustomObservable(nil)
     }
     
     struct Output {
-        var searchResults: Observable<[Search]?> = Observable(nil)
-        var navigateToDetail: Observable<Search?> = Observable(nil)
-        var sortButtonTitle: Observable<String> = Observable("최신순")
-        var errorMessage: Observable<String?> = Observable(nil)
+        var searchResults: CustomObservable<[Search]?> = CustomObservable(nil)
+        var navigateToDetail: CustomObservable<Search?> = CustomObservable(nil)
+        var sortButtonTitle: CustomObservable<String> = CustomObservable("최신순")
+        var errorMessage: CustomObservable<String?> = CustomObservable(nil)
     }
     
     var input: Input

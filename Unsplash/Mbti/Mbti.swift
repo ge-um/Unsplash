@@ -29,5 +29,3 @@ enum Mbti: String, CaseIterable {
         return self.rawValue
     }
 }
-
-enum MbtiType { case ei, sn, tf, jp }

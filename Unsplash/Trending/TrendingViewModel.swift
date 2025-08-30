@@ -9,12 +9,12 @@ import Foundation
 
 final class TrendingViewModel {
     struct Input {
-        var viewDidLoad: Observable<Void> = Observable(())
+        var viewDidLoad: CustomObservable<Void> = CustomObservable(())
     }
     
     struct Output {
-        var topicResponses: Observable<[Int: [TopicResponse]]> = Observable([:])
-        var showAlert: Observable<String> = Observable("")
+        var topicResponses: CustomObservable<[Int: [TopicResponse]]> = CustomObservable([:])
+        var showAlert: CustomObservable<String> = CustomObservable("")
     }
     
     var input: Input

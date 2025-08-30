@@ -1,5 +1,5 @@
 //
-//  Observable.swift
+//  CustomObservable.swift
 //  Unsplash
 //
 //  Created by 금가경 on 8/16/25.
@@ -7,7 +7,7 @@
 
 import Foundation
 
-final class Observable<T> {
+final class CustomObservable<T> {
     private var action: ((T) -> Void)?
     
     var value: T {
